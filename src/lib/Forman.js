@@ -1,34 +1,31 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+// @flow
 
-import { validateValue } from './validations';
+import * as React from 'react';
 
-export class Forman extends React.PureComponent {
-    static getDerivedStateFromProps(nextProps, prevState) {
+import { createField } from './create-field';
+
+type Props = {
+    value: Object,
+    rules: Object,
+    render: Function,
+};
+
+type State = {
+    fields: Object,
+    previousValue: Object,
+};
+
+export class Forman extends React.PureComponent<Props, State> {
+    static defaultProps = {
+        rules: null,
+    };
+
+    static getDerivedStateFromProps(nextProps: Props, prevState: any) {
         const { value, rules } = nextProps;
         const { fields, previousValue } = prevState;
 
         const newFields = Object.keys(value).reduce((res, key) => {
-            const isNewField = fields[key] === undefined || fields[key] === null;
-            const hasChanges = value[key] !== previousValue[key];
-
-            // Define dirty state
-            let dirty;
-            if (isNewField) dirty = false;
-            else dirty = hasChanges;
-
-            // Find errors and validity
-            let errors;
-            let valid;
-            if (isNewField || hasChanges) {
-                errors = validateValue(value[key], rules[key]);
-                valid = errors === null || errors.length === 0;
-            } else {
-                ({ errors, valid } = fields[key]);
-            }
-
-            // Set key value
-            res[key] = { dirty, errors, valid };
+            res[key] = createField(key, fields, value, rules, previousValue);
 
             return res;
         }, {});
@@ -39,7 +36,7 @@ export class Forman extends React.PureComponent {
         };
     }
 
-    constructor(props) {
+    constructor(props: Props) {
         super(props);
 
         this.state = {
@@ -52,15 +49,5 @@ export class Forman extends React.PureComponent {
         return this.props.render(this.state.fields);
     }
 }
-
-Forman.propTypes = {
-    value: PropTypes.instanceOf(Object).isRequired,
-    rules: PropTypes.instanceOf(Object),
-    render: PropTypes.func.isRequired,
-};
-
-Forman.defaultProps = {
-    rules: null,
-};
 
 export default Forman;
