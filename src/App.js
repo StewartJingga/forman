@@ -27,8 +27,9 @@ export class App extends PureComponent {
         };
     }
 
-    renderErrors(errors) {
-        if (errors && errors.length > 0) {
+    renderErrors(field) {
+        const { dirty, errors } = field;
+        if (dirty && errors && errors.length > 0) {
             return errors.map((d, i) => (
                 <div key={i}>{d}</div>
             ))
@@ -44,31 +45,34 @@ export class App extends PureComponent {
     render() {
         return (
             <form onSubmit={this.onSubmit}>
-                <Forman render={({ first_name, last_name, email }) =>
-                    <React.Fragment>
-                        <input type="text"
-                            value={this.state.first_name}
-                            onChange={this.onInputChange('first_name')}
-                        />
-                        {this.renderErrors(first_name.errors)}
-                        <br />
-
-                        <input type="text"
-                            value={this.state.last_name}
-                            onChange={this.onInputChange('last_name')}
-                        />
-                        {this.renderErrors(last_name.errors)}
-                        <br />
-
-                        <input type="text"
-                            value={this.state.email}
-                            onChange={this.onInputChange('email')}
-                        />
-                        {this.renderErrors(email.errors)}
-                    </React.Fragment>
-                    }
+                <Forman
                     value={this.state}
                     rules={FORM_RULES}
+                    render={({ first_name, last_name, email }, form) =>
+                        <React.Fragment>
+                            <input type="text"
+                                value={this.state.first_name}
+                                onChange={this.onInputChange('first_name')}
+                            />
+                            {this.renderErrors(first_name)}
+                            <br />
+
+                            <input type="text"
+                                value={this.state.last_name}
+                                onChange={this.onInputChange('last_name')}
+                            />
+                            {this.renderErrors(last_name)}
+                            <br />
+
+                            <input type="text"
+                                value={this.state.email}
+                                onChange={this.onInputChange('email')}
+                            />
+                            {this.renderErrors(email)}
+
+                            <button disabled={!form.valid}>Submit</button>
+                        </React.Fragment>
+                    }
                 />
             </form>
         );
