@@ -13,6 +13,7 @@ type Props = {
 type State = {
     fields: Object,
     previousValue: Object,
+    form: Object,
 };
 
 export class Forman extends React.PureComponent<Props, State> {
@@ -24,8 +25,15 @@ export class Forman extends React.PureComponent<Props, State> {
         const { value, rules } = nextProps;
         const { fields, previousValue } = prevState;
 
+        let formIsValid = true;
         const newFields = Object.keys(value).reduce((res, key) => {
-            res[key] = createField(key, fields, value, rules, previousValue);
+            const field = createField(key, fields, value, rules, previousValue);
+
+            if (formIsValid && !field.valid) {
+                formIsValid = false;
+            }
+
+            res[key] = field;
 
             return res;
         }, {});
@@ -33,6 +41,7 @@ export class Forman extends React.PureComponent<Props, State> {
         return {
             fields: newFields,
             previousValue: value,
+            form: { valid: formIsValid },
         };
     }
 
@@ -42,11 +51,13 @@ export class Forman extends React.PureComponent<Props, State> {
         this.state = {
             fields: {},
             previousValue: {},
+            form: {},
         };
     }
 
     render() {
-        return this.props.render(this.state.fields);
+        const { fields, form } = this.state;
+        return this.props.render(fields, form);
     }
 }
 
